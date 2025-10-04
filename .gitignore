@@ -110,11 +110,6 @@ nosetests.xml
 coverage.xml
 
 # ========================
-# Translations
-# ========================
-*.mo
-
-# ========================
 # Django stuff:
 # ========================
 *.log
@@ -148,13 +143,6 @@ instance/
 # Sphinx documentation docs
 # ========================
 docs/_build/
-
-# ========================
-# PyInstaller
-# ========================
-# Usually these files are written by a python script from a template
-# They are usually named 'project_name.spec'
-# *.spec
 
 # ========================
 # Installers
@@ -234,3 +222,16 @@ docs/_build/
 *.bak
 *.swp
 *.swo
+
+# ========================
+# Exceptions: Do not ignore essential frontend config files
+# ========================
+# Allow package.json, lockfiles, and config files in any subdirectory (e.g., frontend/)
+!**/package.json
+!**/package-lock.json
+!**/pnpm-lock.yaml
+!**/yarn.lock
+!**/vite.config.js
+!**/vite.config.ts
+!**/tsconfig.json
+!**/index.html
