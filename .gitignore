@@ -1,0 +1,236 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+ENV/
+.env
+.env.local
+.env.*.local
+
+# Django specific
+*.log
+*.pot
+*.pyc
+
+# ========================
+# Node.js / Frontend
+# ========================
+node_modules/
+dist/
+build/
+out/
+.vscode/
+.idea/
+
+# Vite specific
+.vite/
+
+# ========================
+# Environment Variables
+# ========================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+*.swp
+*.swo
+
+# ========================
+# Logs and Databases
+# ========================
+logs/
+*.log
+*.sqlite3
+*.db
+
+# ========================
+# IDE / Editor files
+# ========================
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# ========================
+# OS generated files
+# ========================
+ehthumbs.db
+Desktop.ini
+
+# ========================
+# Coverage reports
+# ========================
+htmlcov/
+.tox/
+.cache
+nosetests.xml
+coverage.xml
+
+# ========================
+# Translations
+# ========================
+*.mo
+
+# ========================
+# Documentation
+# ========================
+docs/_build/
+
+# ========================
+# PyInstaller
+# ========================
+# Usually these files are written by a python script from a template
+# They are usually named 'project_name.spec'
+# *.spec
+
+# ========================
+# Installer logs
+# ========================
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ========================
+# Unit test / coverage reports
+# ========================
+htmlcov/
+.tox/
+.cache
+nosetests.xml
+coverage.xml
+
+# ========================
+# Translations
+# ========================
+*.mo
+
+# ========================
+# Django stuff:
+# ========================
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# ========================
+# Celery stuff
+# ========================
+celerybeat-schedule
+celerybeat.pid
+
+# ========================
+# SageMaker stuff
+# ========================
+sm_local/
+
+# ========================
+# Flask stuff
+# ========================
+instance/
+.webassets-cache
+
+# ========================
+# Scrapy stuff:
+# ========================
+.scrapy
+
+# ========================
+# Sphinx documentation docs
+# ========================
+docs/_build/
+
+# ========================
+# PyInstaller
+# ========================
+# Usually these files are written by a python script from a template
+# They are usually named 'project_name.spec'
+# *.spec
+
+# ========================
+# Installers
+# ========================
+*.msi
+*.exe
+
+# ========================
+# Windows installer files
+# ========================
+*.cab
+*.msm
+*.msp
+*.msu
+
+# ========================
+# Compression archives
+# ========================
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# ========================
+# Audio/Video files
+# ========================
+*.aac
+*.flac
+*.mp3
+*.ogg
+*.opus
+*.wav
+*.wma
+*.avi
+*.mov
+*.mp4
+*.mpeg
+*.mkv
+*.webm
+
+# ========================
+# Images
+# ========================
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.ico
+
+# ========================
+# Fonts
+# ========================
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+# ========================
+# Data files
+# ========================
+*.csv
+*.json
+*.xml
+*.yaml
+*.yml
+
+# ========================
+# Other
+# ========================
+*~
+*.bak
+*.swp
+*.swo

@@ -1,0 +1,22 @@
+# frontend/Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar pnpm
+RUN npm install -g pnpm
+
+## Copiar archivos de dependencias
+COPY package.json pnpm-lock.yaml ./
+
+# Instala dependencias
+RUN pnpm install --frozen-lockfile
+
+# Copia el resto del código
+COPY . .
+
+# Expone el puerto de Vite (por defecto 5173)
+EXPOSE 5173
+
+# Inicia el servidor de desarrollo
+CMD ["pnpm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]

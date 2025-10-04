@@ -1,0 +1,18 @@
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+
+const generatePDF = (data) => {
+  const input = document.getElementById('pdf-content');
+  if (!input) return;
+
+  html2canvas(input, { scale: 2 }).then((canvas) => {
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const width = pdf.internal.pageSize.getWidth();
+    const height = (canvas.height * width) / canvas.width;
+
+    // Si el contenido es muy alto, podrías dividir en páginas, pero para este caso asumimos 1 página
+    pdf.addImage(imgData, 'PNG', 0, 0, width, height > 297 ? 297 : height);
+    pdf.save(`Seguro_Occident_${data.nombre.replace(/\s+/g, '_')}.pdf`);
+  });
+};
