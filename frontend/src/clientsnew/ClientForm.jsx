@@ -4,7 +4,6 @@ import { usePersistedState } from "../utils/usePersistedState";
 
 const STORAGE_KEY = "seguros_nana_client_form";
 
-// Función auxiliar para obtener la fecha de hoy en formato YYYY-MM-DD
 const getTodayDate = () => {
   const today = new Date();
   const year = today.getFullYear();
@@ -24,8 +23,8 @@ export const ClientForm = ({ onSubmit, onClear }) => {
       tieneHospitalizacion: false,
       tieneMascota: false,
       costoTotal: "",
-      observaciones: "",          // ← Nuevo campo
-      fechaCotizacion: getTodayDate(), // ← Fecha de hoy por defecto
+      observaciones: "",
+      fechaCotizacion: getTodayDate(),
     },
     indenizas: {
       tieneIndemnizacion: [],
@@ -41,14 +40,12 @@ export const ClientForm = ({ onSubmit, onClear }) => {
 
   const [state, setState] = usePersistedState(STORAGE_KEY, initialData);
   const { formData, indenizas, mascotasInfo } = state;
-
-  // Estado local no persistente
   const [errorMessage, setErrorMessage] = useState("");
 
   const indemnizacionTipos = [
     { key: "tieneIndemnizacion", label: "Indemnización por Hospitalización", type: "number" },
     { key: "tieneIndeAccidente", label: "Indemnización por Accidente", type: "number" },
-    { key: "tieneIndeInvalidez", label: "Indemnización por invalidez", type: "number" },
+    { key: "tieneIndeInvalidez", label: "Indemnización por Invalidez", type: "number" },
     { key: "tieneHospitalizacion", label: "Hospitalización Elite", type: "boolean" },
   ];
 
@@ -56,7 +53,7 @@ export const ClientForm = ({ onSubmit, onClear }) => {
     const { name, value, type, checked } = e.target;
 
     if (name.startsWith("indeniza_")) {
-      const [prefix, tipo, indexStr] = name.split("_");
+      const [_, tipo, indexStr] = name.split("_");
       const index = parseInt(indexStr, 10);
       setState((prev) => {
         const newIndenizas = { ...prev.indenizas };
@@ -81,24 +78,13 @@ export const ClientForm = ({ onSubmit, onClear }) => {
       if (nuevaCantidad === "" || (/^\d+$/.test(nuevaCantidad) && parseInt(nuevaCantidad, 10) >= 1 && parseInt(nuevaCantidad, 10) <= 10)) {
         setState((prev) => {
           if (nuevaCantidad === "") {
-            return {
-              ...prev,
-              mascotasInfo: { cantidad: "", tipos: [] },
-            };
+            return { ...prev, mascotasInfo: { cantidad: "", tipos: [] } };
           }
           const num = parseInt(nuevaCantidad, 10);
           const tipos = [...prev.mascotasInfo.tipos];
-          if (tipos.length > num) {
-            tipos.splice(num);
-          } else {
-            while (tipos.length < num) {
-              tipos.push("perro");
-            }
-          }
-          return {
-            ...prev,
-            mascotasInfo: { cantidad: nuevaCantidad, tipos },
-          };
+          if (tipos.length > num) tipos.splice(num);
+          else while (tipos.length < num) tipos.push("perro");
+          return { ...prev, mascotasInfo: { cantidad: nuevaCantidad, tipos } };
         });
       }
       return;
@@ -108,10 +94,7 @@ export const ClientForm = ({ onSubmit, onClear }) => {
       const index = parseInt(name.split("_")[1], 10);
       const nuevosTipos = [...mascotasInfo.tipos];
       nuevosTipos[index] = value;
-      setState((prev) => ({
-        ...prev,
-        mascotasInfo: { ...prev.mascotasInfo, tipos: nuevosTipos },
-      }));
+      setState((prev) => ({ ...prev, mascotasInfo: { ...prev.mascotasInfo, tipos: nuevosTipos } }));
       return;
     }
 
@@ -134,19 +117,13 @@ export const ClientForm = ({ onSubmit, onClear }) => {
             newIndenizas = { ...newIndenizas, [name]: current };
           }
         }
-
         return { ...prev, formData: newFormData, indenizas: newIndenizas };
       });
       return;
     }
 
-    // Manejo genérico de campos de formData (incluye observaciones y fechaCotizacion)
-    setState((prev) => ({
-      ...prev,
-      formData: { ...prev.formData, [name]: value },
-    }));
+    setState((prev) => ({ ...prev, formData: { ...prev.formData, [name]: value } }));
 
-    // Si cambia cantidadFamiliar, actualizamos indenizas
     if (name === "cantidadFamiliar") {
       const num = value === "" ? 0 : parseInt(value, 10);
       setState((prev) => {
@@ -171,9 +148,8 @@ export const ClientForm = ({ onSubmit, onClear }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!formData.nombre.trim()) {
-      setErrorMessage("Por favor completa el nombre.");
+      setErrorMessage("Por favor, ingresa el nombre del cliente.");
       return;
     }
 
@@ -213,10 +189,7 @@ export const ClientForm = ({ onSubmit, onClear }) => {
         tieneHospitalizacion: formData.tieneHospitalizacion ? [...indenizas.tieneHospitalizacion] : [],
       },
       mascotas: formData.tieneMascota
-        ? {
-            cantidad: parseInt(mascotasInfo.cantidad, 10),
-            tipos: [...mascotasInfo.tipos],
-          }
+        ? { cantidad: parseInt(mascotasInfo.cantidad, 10), tipos: [...mascotasInfo.tipos] }
         : null,
       costoTotal: formData.costoTotal ? parseFloat(formData.costoTotal) : 0,
       observaciones: formData.observaciones.trim(),
@@ -229,13 +202,9 @@ export const ClientForm = ({ onSubmit, onClear }) => {
   };
 
   const handleClear = () => {
-    // Al limpiar, volvemos a poner la fecha de hoy
     setState({
       ...initialData,
-      formData: {
-        ...initialData.formData,
-        fechaCotizacion: getTodayDate(),
-      },
+      formData: { ...initialData.formData, fechaCotizacion: getTodayDate() },
     });
     setErrorMessage("");
     onClear();
@@ -253,83 +222,72 @@ export const ClientForm = ({ onSubmit, onClear }) => {
 
     const num = parseInt(cantidad, 10);
     return (
-      <div key={tipo.key} className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200 mt-4">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">
-          {tipo.label}: {tipo.type === "boolean" ? "Selecciona por familiar" : "Ingrese los valores"}
+      <div key={tipo.key} className="space-y-3 p-4 bg-blue-50 rounded-xl border border-blue-100 mt-4">
+        <h3 className="text-sm font-semibold text-blue-800 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          {tipo.label}
         </h3>
-        {Array.from({ length: num }).map((_, i) => {
-          if (tipo.type === "boolean") {
-            return (
-              <div key={i}>
-                <label
-                  htmlFor={`indeniza_${tipo.key}_${i}`}
-                  className="block text-sm text-gray-600 mb-1"
-                >
-                  {tipo.label} - Familiar {i + 1}
-                </label>
-                <select
-                  id={`indeniza_${tipo.key}_${i}`}
-                  name={`indeniza_${tipo.key}_${i}`}
-                  value={indenizas[tipo.key][i] || "no"}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                >
-                  <option value="si">Sí</option>
-                  <option value="no">No</option>
-                </select>
-              </div>
-            );
-          } else {
-            return (
-              <div key={i}>
-                <label
-                  htmlFor={`indeniza_${tipo.key}_${i}`}
-                  className="block text-sm text-gray-600 mb-1"
-                >
-                  {tipo.label} - Familiar {i + 1}
-                </label>
-                <input
-                  type="number"
-                  id={`indeniza_${tipo.key}_${i}`}
-                  name={`indeniza_${tipo.key}_${i}`}
-                  value={indenizas[tipo.key][i] || ""}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  placeholder={`Ej. ${(i + 1) * 1000}`}
-                />
-              </div>
-            );
-          }
-        })}
+        <p className="text-xs text-blue-600 mb-2">
+          {tipo.type === "boolean" ? "Selecciona 'Sí' o 'No' para cada familiar" : "Ingresa el importe en euros (€)"}
+        </p>
+        {Array.from({ length: num }).map((_, i) => (
+          <div key={i} className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-1">
+              Familiar {i + 1}
+            </label>
+            {tipo.type === "boolean" ? (
+              <select
+                name={`indeniza_${tipo.key}_${i}`}
+                value={indenizas[tipo.key][i] || "no"}
+                onChange={handleChange}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+              >
+                <option value="si">Sí</option>
+                <option value="no">No</option>
+              </select>
+            ) : (
+              <input
+                type="number"
+                name={`indeniza_${tipo.key}_${i}`}
+                value={indenizas[tipo.key][i] || ""}
+                onChange={handleChange}
+                min="0"
+                step="0.01"
+                placeholder="Ej. 1000"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            )}
+          </div>
+        ))}
       </div>
     );
   };
 
   const renderMascotasSection = () => {
     if (!formData.tieneMascota) return null;
-
     return (
-      <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200 mt-4">
-        <h3 className="text-sm font-medium text-blue-800 mb-2">
+      <div className="space-y-4 p-4 bg-purple-50 rounded-xl border border-purple-100 mt-4">
+        <h3 className="text-sm font-semibold text-purple-800 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
           Cobertura para Mascotas
         </h3>
 
         <div>
-          <label htmlFor="cantidadMascotas" className="block text-sm text-gray-700 mb-1">
-            Cantidad de mascotas a asegurar (máx. 10)
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            ¿Cuántas mascotas deseas asegurar? (máx. 10)
           </label>
           <input
             type="number"
-            id="cantidadMascotas"
             name="cantidadMascotas"
             value={mascotasInfo.cantidad}
             onChange={handleChange}
             min="1"
             max="10"
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="Ej. 2"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
           />
         </div>
 
@@ -337,16 +295,13 @@ export const ClientForm = ({ onSubmit, onClear }) => {
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-gray-700">Especie de cada mascota:</h4>
             {Array.from({ length: parseInt(mascotasInfo.cantidad, 10) }, (_, i) => (
-              <div key={i}>
-                <label htmlFor={`tipoMascota_${i}`} className="block text-sm text-gray-600 mb-1">
-                  Mascota {i + 1}
-                </label>
+              <div key={i} className="flex flex-col">
+                <label className="text-sm text-gray-600 mb-1">Mascota {i + 1}</label>
                 <select
-                  id={`tipoMascota_${i}`}
                   name={`tipoMascota_${i}`}
                   value={mascotasInfo.tipos[i] || "perro"}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
                 >
                   <option value="perro">Perro</option>
                   <option value="gato">Gato</option>
@@ -360,147 +315,137 @@ export const ClientForm = ({ onSubmit, onClear }) => {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-xl shadow-md border border-gray-200">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-        Registro de Cliente
-      </h2>
+    <div className="max-w-2xl mx-auto p-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-lg border border-gray-200">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-800">📝 Registro de Cliente</h2>
+        <p className="text-gray-500 text-sm mt-2">Completa los datos para generar tu cotización personalizada</p>
+      </div>
 
       {errorMessage && (
-        <div className="mb-5 p-3 bg-red-50 text-red-700 rounded-lg flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl flex items-start">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2A1 1 0 0012.707 7.293l-2-2z" clipRule="evenodd" />
           </svg>
           <span>{errorMessage}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Nombre */}
         <div>
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre Completo
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">👤 Nombre Completo *</label>
           <input
             type="text"
-            id="nombre"
             name="nombre"
             value={formData.nombre}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-            placeholder="Ej. Juan Pérez"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            placeholder="Ej. Juan Pérez García"
           />
         </div>
 
+        {/* Cantidad familiar */}
         <div>
-          <label htmlFor="cantidadFamiliar" className="block text-sm font-medium text-gray-700 mb-1">
-            Cantidad de Familiares
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">👨‍👩‍👧‍👦 Cantidad de Familiares</label>
           <input
             type="number"
-            id="cantidadFamiliar"
             name="cantidadFamiliar"
             value={formData.cantidadFamiliar}
             onChange={handleChange}
             min="0"
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder="Ej. 3"
           />
         </div>
 
-        {indemnizacionTipos.map((tipo) => (
-          <div key={tipo.key} className="flex items-center">
-            <input
-              type="checkbox"
-              id={tipo.key}
-              name={tipo.key}
-              checked={formData[tipo.key]}
-              onChange={handleChange}
-              className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-            />
-            <label htmlFor={tipo.key} className="ml-2 block text-sm text-gray-700">
-              {tipo.label}
+        {/* Coberturas adicionales */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">🛡️ Coberturas Adicionales</label>
+          <div className="space-y-2">
+            {indemnizacionTipos.map((tipo) => (
+              <label key={tipo.key} className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name={tipo.key}
+                  checked={formData[tipo.key]}
+                  onChange={handleChange}
+                  className="mt-1 h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <span className="text-gray-700">{tipo.label}</span>
+              </label>
+            ))}
+            <label className="flex items-start space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="tieneMascota"
+                checked={formData.tieneMascota}
+                onChange={handleChange}
+                className="mt-1 h-5 w-5 text-purple-600 rounded focus:ring-purple-500"
+              />
+              <span className="text-gray-700">🐾 Cobertura para Mascotas</span>
             </label>
           </div>
-        ))}
-
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="tieneMascota"
-            name="tieneMascota"
-            checked={formData.tieneMascota}
-            onChange={handleChange}
-            className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-          />
-          <label htmlFor="tieneMascota" className="ml-2 block text-sm text-gray-700">
-            Cobertura para Mascotas
-          </label>
         </div>
 
+        {/* Secciones dinámicas */}
         {indemnizacionTipos.map(renderIndemnizacionSection)}
         {renderMascotasSection()}
 
+        {/* Costo total */}
         <div>
-          <label htmlFor="costoTotal" className="block text-sm font-medium text-gray-700 mb-1">
-            Costo del Seguro
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">💶 Costo Mensual del Seguro (€)</label>
           <input
             type="number"
-            id="costoTotal"
             name="costoTotal"
             value={formData.costoTotal}
             onChange={handleChange}
             min="0"
             step="0.01"
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
             placeholder="Ej. 150.50"
           />
         </div>
 
-        {/* Campo de observaciones */}
+        {/* Observaciones */}
         <div>
-          <label htmlFor="observaciones" className="block text-sm font-medium text-gray-700 mb-1">
-            Observaciones (opcional)
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">📝 Observaciones (Opcional)</label>
           <textarea
-            id="observaciones"
             name="observaciones"
             value={formData.observaciones}
             onChange={handleChange}
             rows="3"
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-            placeholder="Ej. Cliente prefiere cobertura amplia..."
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 outline-none"
+            placeholder="Notas adicionales sobre el cliente..."
           />
         </div>
 
-        {/* Campo de fecha */}
+        {/* Fecha */}
         <div>
-          <label htmlFor="fechaCotizacion" className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de Cotización
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha de Cotización</label>
           <input
             type="date"
-            id="fechaCotizacion"
             name="fechaCotizacion"
             value={formData.fechaCotizacion}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 outline-none"
           />
         </div>
 
-        <div className="flex space-x-3">
-          <button
-            type="submit"
-            className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition"
-          >
-            Ver Vista Previa
-          </button>
+        {/* Botones */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-4">
           <button
             type="button"
             onClick={handleClear}
-            className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg shadow-sm transition"
+            className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-xl transition shadow-sm"
           >
-            Limpiar
+            🧹 Limpiar Todo
+          </button>
+          <button
+            type="submit"
+            className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl shadow-md transition"
+          >
+            👁️ Ver Vista Previa
           </button>
         </div>
       </form>

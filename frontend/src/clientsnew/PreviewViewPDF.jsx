@@ -14,11 +14,14 @@ export const PreviewViewPDF = ({ data }) => {
     indenizas,
     cantidadFamiliar,
     costoTotal,
-    mascotas, // ← Asegúrate de que este campo venga en data
+    mascotas,
   } = data;
 
-  // Función auxiliar: ¿tiene al menos un valor > 0?
+  // ¿Tiene al menos un valor numérico > 0?
   const hasNonZeroValues = (arr) => Array.isArray(arr) && arr.some(v => v > 0);
+
+  // ¿Tiene al menos un "si" en un array de respuestas booleanas ("si"/"no")?
+  const hasAnyYes = (arr) => Array.isArray(arr) && arr.some(v => v === "si");
 
   return (
     <div
@@ -146,7 +149,7 @@ export const PreviewViewPDF = ({ data }) => {
           </a>
         </li>
 
-        {/* Indemnizaciones condicionales (solo si hay valores > 0) */}
+        {/* Indemnizaciones condicionales */}
         {tieneIndemnizacion && hasNonZeroValues(indenizas.tieneIndemnizacion) && (
           <li>
             <strong className="text-red-600">10. Indemnización por hospitalización</strong>: Por día de ingreso hospitalario.
@@ -186,12 +189,22 @@ export const PreviewViewPDF = ({ data }) => {
           </li>
         )}
 
-        {tieneHospitalizacion && (
+        {/* Hospitalización Elite: mostrar solo si hay al menos un "si" */}
+        {tieneHospitalizacion && hasAnyYes(indenizas.tieneHospitalizacion) && (
           <li>
-            <strong className="text-red-600">13. Hospitalización Elite</strong>
+            <strong className="text-red-600">13. Hospitalización Elite</strong>: Cobertura activa para los siguientes familiares:
+            <ul className="mt-1 pl-5 list-none">
+              {indenizas.tieneHospitalizacion
+                .map((respuesta, i) => ({ respuesta, index: i }))
+                .filter(({ respuesta }) => respuesta === "si")
+                .map(({ index }) => (
+                  <li key={index} className="text-gray-700">• Familiar {index + 1}: <strong>Sí</strong></li>
+                ))}
+            </ul>
           </li>
         )}
 
+        {/* Mascotas */}
         {tieneMascota && mascotas && (
           <li>
             <strong className="text-red-600">14. Cobertura para mascotas</strong>:

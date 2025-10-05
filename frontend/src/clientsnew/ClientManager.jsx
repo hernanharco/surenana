@@ -17,29 +17,52 @@ export const ClientManager = () => {
   };
 
   const generatePDF = () => {
-    const input = document.getElementById("pdf-content");
-    if (!input) {
-      console.error("Elemento #pdf-content no encontrado");
-      return;
+  const input = document.getElementById("pdf-content");
+  if (!input) {
+    console.error("Elemento #pdf-content no encontrado");
+    return;
+  }
+
+  // Forzar que el contenedor sea visible y tenga altura completa
+  const originalStyle = input.style.cssText;
+  input.style.overflow = "visible";
+  input.style.height = "auto";
+
+  // Aumentar escala para mejor calidad en móvil
+  html2canvas(input, {
+    scale: 2, // Escala razonable para móviles (3 puede ser demasiado)
+    useCORS: true,
+    logging: false,
+    backgroundColor: "#ffffff",
+    width: input.scrollWidth, // Capturar todo el ancho
+    height: input.scrollHeight, // Capturar toda la altura
+  }).then((canvas) => {
+    // Restaurar estilo original
+    input.style.cssText = originalStyle;
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = 210; // Ancho A4 en mm
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    // Si el contenido es más alto que una página, dividirlo
+    let position = 0;
+    let pageHeight = 297; // Altura A4 en mm
+
+    while (position < pdfHeight) {
+      pdf.addImage(imgData, "PNG", 0, -position, pdfWidth, pdfHeight);
+
+      position += pageHeight;
+
+      if (position < pdfHeight) {
+        pdf.addPage();
+      }
     }
 
-    // Aumentar escala para mejor calidad en móvil
-    html2canvas(input, {
-      scale: 3, // Alta resolución
-      useCORS: true,
-      logging: false,
-      backgroundColor: "#ffffff",
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      // Si el contenido es más largo que una página, podrías dividirlo (aquí asumimos 1 página)
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, Math.min(pdfHeight, 297));
-      pdf.save(`Seguro_Occident_${previewData.nombre.replace(/\s+/g, "_")}.pdf`);
-    });
-  };
+    pdf.save(`Seguro_Occident_${previewData.nombre.replace(/\s+/g, "_")}.pdf`);
+  });
+};
 
   if (previewData) {
     return (
