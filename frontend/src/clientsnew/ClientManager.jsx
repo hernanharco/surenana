@@ -1,7 +1,7 @@
 // src/components/ClientManager.jsx
 import React, { useState } from "react";
 import { ClientForm } from "./ClientForm";
-import { PreviewView } from "./PreviewView";
+import { PreviewViewPDF } from "./PreviewViewPDF";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
@@ -37,7 +37,7 @@ export const ClientManager = () => {
   if (previewData) {
     return (
       <div className="max-w-4xl mx-auto p-4 space-y-6">
-        <PreviewView data={previewData} />
+        <PreviewViewPDF data={previewData} />
         <div className="flex justify-center gap-4">
           <button
             onClick={() => setPreviewData(null)}

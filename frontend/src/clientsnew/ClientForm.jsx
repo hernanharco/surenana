@@ -1,34 +1,55 @@
 // src/components/ClientForm.jsx
 import React, { useState } from "react";
+import { usePersistedState } from "../utils/usePersistedState";
+
+const STORAGE_KEY = "seguros_nana_client_form";
+
+// Función auxiliar para obtener la fecha de hoy en formato YYYY-MM-DD
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export const ClientForm = ({ onSubmit, onClear }) => {
-  const [formData, setFormData] = useState({
-    nombre: "",
-    cantidadFamiliar: "",
-    tieneIndemnizacion: false,
-    tieneIndeAccidente: false,
-    tieneIndeInvalidez: false,
-    tieneHospitalizacion: false,
-    tieneMascota: false,
-    costoTotal: false
-  });
+  const initialData = {
+    formData: {
+      nombre: "",
+      cantidadFamiliar: "",
+      tieneIndemnizacion: false,
+      tieneIndeAccidente: false,
+      tieneIndeInvalidez: false,
+      tieneHospitalizacion: false,
+      tieneMascota: false,
+      costoTotal: "",
+      observaciones: "",          // ← Nuevo campo
+      fechaCotizacion: getTodayDate(), // ← Fecha de hoy por defecto
+    },
+    indenizas: {
+      tieneIndemnizacion: [],
+      tieneIndeAccidente: [],
+      tieneIndeInvalidez: [],
+      tieneHospitalizacion: [],
+    },
+    mascotasInfo: {
+      cantidad: "",
+      tipos: [],
+    },
+  };
 
-  const [indenizas, setIndenizas] = useState({
-    tieneIndemnizacion: [],
-    tieneIndeAccidente: [],
-    tieneIndeInvalidez: [],
-    tieneHospitalizacion: [],
-    tieneMascota: [],
-  });
+  const [state, setState] = usePersistedState(STORAGE_KEY, initialData);
+  const { formData, indenizas, mascotasInfo } = state;
 
+  // Estado local no persistente
   const [errorMessage, setErrorMessage] = useState("");
 
   const indemnizacionTipos = [
-    { key: "tieneIndemnizacion", label: "Indemnización por Hospitalización" },
-    { key: "tieneIndeAccidente", label: "Indemnización por Accidente" },
-    { key: "tieneIndeInvalidez", label: "Indemnización por invalidez" },
-    { key: "tieneHospitalizacion", label: "Hospitalización Elite" },
-    { key: "tieneMascota", label: "Cobertura para Mascotas" },
+    { key: "tieneIndemnizacion", label: "Indemnización por Hospitalización", type: "number" },
+    { key: "tieneIndeAccidente", label: "Indemnización por Accidente", type: "number" },
+    { key: "tieneIndeInvalidez", label: "Indemnización por invalidez", type: "number" },
+    { key: "tieneHospitalizacion", label: "Hospitalización Elite", type: "boolean" },
   ];
 
   const handleChange = (e) => {
@@ -37,49 +58,113 @@ export const ClientForm = ({ onSubmit, onClear }) => {
     if (name.startsWith("indeniza_")) {
       const [prefix, tipo, indexStr] = name.split("_");
       const index = parseInt(indexStr, 10);
-      const newIndenizas = { ...indenizas };
-      newIndenizas[tipo][index] = value === "" ? "" : value;
-      setIndenizas(newIndenizas);
+      setState((prev) => {
+        const newIndenizas = { ...prev.indenizas };
+        newIndenizas[tipo][index] = value;
+        return { ...prev, indenizas: newIndenizas };
+      });
       return;
     }
 
-    if (indemnizacionTipos.some((item) => item.key === name)) {
-      const isChecked = type === "checkbox" ? checked : value === "true";
-      setFormData((prev) => ({ ...prev, [name]: isChecked }));
+    if (name === "tieneMascota") {
+      const isChecked = checked;
+      setState((prev) => ({
+        ...prev,
+        formData: { ...prev.formData, tieneMascota: isChecked },
+        mascotasInfo: isChecked ? prev.mascotasInfo : { cantidad: "", tipos: [] },
+      }));
+      return;
+    }
 
-      if (!isChecked) {
-        setIndenizas((prev) => ({ ...prev, [name]: [] }));
-      } else if (formData.cantidadFamiliar !== "") {
-        const num = parseInt(formData.cantidadFamiliar, 10);
-        if (!isNaN(num) && num > 0) {
-          setIndenizas((prev) => {
-            const current = [...(prev[name] || [])].slice(0, num);
-            while (current.length < num) current.push("");
-            return { ...prev, [name]: current };
-          });
-        }
+    if (name === "cantidadMascotas") {
+      const nuevaCantidad = value === "" ? "" : value;
+      if (nuevaCantidad === "" || (/^\d+$/.test(nuevaCantidad) && parseInt(nuevaCantidad, 10) >= 1 && parseInt(nuevaCantidad, 10) <= 10)) {
+        setState((prev) => {
+          if (nuevaCantidad === "") {
+            return {
+              ...prev,
+              mascotasInfo: { cantidad: "", tipos: [] },
+            };
+          }
+          const num = parseInt(nuevaCantidad, 10);
+          const tipos = [...prev.mascotasInfo.tipos];
+          if (tipos.length > num) {
+            tipos.splice(num);
+          } else {
+            while (tipos.length < num) {
+              tipos.push("perro");
+            }
+          }
+          return {
+            ...prev,
+            mascotasInfo: { cantidad: nuevaCantidad, tipos },
+          };
+        });
       }
       return;
     }
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name.startsWith("tipoMascota_")) {
+      const index = parseInt(name.split("_")[1], 10);
+      const nuevosTipos = [...mascotasInfo.tipos];
+      nuevosTipos[index] = value;
+      setState((prev) => ({
+        ...prev,
+        mascotasInfo: { ...prev.mascotasInfo, tipos: nuevosTipos },
+      }));
+      return;
+    }
 
+    const tipoItem = indemnizacionTipos.find((item) => item.key === name);
+    if (tipoItem) {
+      const isChecked = type === "checkbox" ? checked : value === "true";
+      setState((prev) => {
+        const newFormData = { ...prev.formData, [name]: isChecked };
+        let newIndenizas = { ...prev.indenizas };
+
+        if (!isChecked) {
+          newIndenizas = { ...newIndenizas, [name]: [] };
+        } else {
+          const num = prev.formData.cantidadFamiliar !== "" ? parseInt(prev.formData.cantidadFamiliar, 10) : 0;
+          if (!isNaN(num) && num > 0) {
+            const current = [...(newIndenizas[name] || [])].slice(0, num);
+            while (current.length < num) {
+              current.push(tipoItem.type === "boolean" ? "no" : "");
+            }
+            newIndenizas = { ...newIndenizas, [name]: current };
+          }
+        }
+
+        return { ...prev, formData: newFormData, indenizas: newIndenizas };
+      });
+      return;
+    }
+
+    // Manejo genérico de campos de formData (incluye observaciones y fechaCotizacion)
+    setState((prev) => ({
+      ...prev,
+      formData: { ...prev.formData, [name]: value },
+    }));
+
+    // Si cambia cantidadFamiliar, actualizamos indenizas
     if (name === "cantidadFamiliar") {
       const num = value === "" ? 0 : parseInt(value, 10);
-      setIndenizas((prev) => {
-        const updated = { ...prev };
+      setState((prev) => {
+        const updatedIndenizas = { ...prev.indenizas };
         indemnizacionTipos.forEach((item) => {
-          if (formData[item.key]) {
+          if (prev.formData[item.key]) {
             if (isNaN(num) || num <= 0) {
-              updated[item.key] = [];
+              updatedIndenizas[item.key] = [];
             } else {
-              const current = [...(updated[item.key] || [])].slice(0, num);
-              while (current.length < num) current.push("");
-              updated[item.key] = current;
+              const current = [...(updatedIndenizas[item.key] || [])].slice(0, num);
+              while (current.length < num) {
+                current.push(item.type === "boolean" ? "no" : "");
+              }
+              updatedIndenizas[item.key] = current;
             }
           }
         });
-        return updated;
+        return { ...prev, indenizas: updatedIndenizas };
       });
     }
   };
@@ -91,21 +176,6 @@ export const ClientForm = ({ onSubmit, onClear }) => {
       setErrorMessage("Por favor completa el nombre.");
       return;
     }
-
-    // for (const { key } of indemnizacionTipos) {
-    //   if (formData[key] && formData.cantidadFamiliar !== "") {
-    //     const cantidad = parseInt(formData.cantidadFamiliar, 10);
-    //     if (!isNaN(cantidad) && cantidad > 0) {
-    //       const hasEmpty = indenizas[key].some(
-    //         (val) => val === "" || isNaN(parseFloat(val))
-    //       );
-    //       if (hasEmpty) {
-    //         setErrorMessage(`Por favor completa todos los campos de ${key.replace("tiene", "").replace(/([A-Z])/g, " $1").toLowerCase()}.`);
-    //         return;
-    //       }
-    //     }
-    //   }
-    // }
 
     let cantidadFamiliarValue = "";
     let txtfamiliar1Value = "";
@@ -132,22 +202,25 @@ export const ClientForm = ({ onSubmit, onClear }) => {
       tieneMascota: formData.tieneMascota,
       indenizas: {
         tieneIndemnizacion: formData.tieneIndemnizacion
-          ? indenizas.tieneIndemnizacion.map((v) => parseFloat(v))
+          ? indenizas.tieneIndemnizacion.map((v) => (v === "" ? 0 : parseFloat(v)))
           : [],
         tieneIndeAccidente: formData.tieneIndeAccidente
-          ? indenizas.tieneIndeAccidente.map((v) => parseFloat(v))
+          ? indenizas.tieneIndeAccidente.map((v) => (v === "" ? 0 : parseFloat(v)))
           : [],
         tieneIndeInvalidez: formData.tieneIndeInvalidez
-          ? indenizas.tieneIndeInvalidez.map((v) => parseFloat(v))
+          ? indenizas.tieneIndeInvalidez.map((v) => (v === "" ? 0 : parseFloat(v)))
           : [],
-        tieneHospitalizacion: formData.tieneHospitalizacion
-          ? indenizas.tieneHospitalizacion.map((v) => parseFloat(v))
-          : [],
-        tieneMascota: formData.tieneMascota
-          ? indenizas.tieneMascota.map((v) => parseFloat(v))
-          : [],        
+        tieneHospitalizacion: formData.tieneHospitalizacion ? [...indenizas.tieneHospitalizacion] : [],
       },
-      costoTotal:formData.costoTotal,
+      mascotas: formData.tieneMascota
+        ? {
+            cantidad: parseInt(mascotasInfo.cantidad, 10),
+            tipos: [...mascotasInfo.tipos],
+          }
+        : null,
+      costoTotal: formData.costoTotal ? parseFloat(formData.costoTotal) : 0,
+      observaciones: formData.observaciones.trim(),
+      fechaCotizacion: formData.fechaCotizacion,
       timestamp: new Date().toISOString(),
     };
 
@@ -156,27 +229,18 @@ export const ClientForm = ({ onSubmit, onClear }) => {
   };
 
   const handleClear = () => {
-    setFormData({
-      nombre: "",
-      cantidadFamiliar: "",
-      tieneIndemnizacion: false,
-      tieneIndeAccidente: false,
-      tieneIndeInvalidez: false,
-      tieneHospitalizacion: false,
-      tieneMascota: false,
-    });
-    setIndenizas({
-      tieneIndemnizacion: [],
-      tieneIndeAccidente: [],
-      tieneIndeInvalidez: [],
-      tieneHospitalizacion: [],
-      tieneMascota: [],
+    // Al limpiar, volvemos a poner la fecha de hoy
+    setState({
+      ...initialData,
+      formData: {
+        ...initialData.formData,
+        fechaCotizacion: getTodayDate(),
+      },
     });
     setErrorMessage("");
     onClear();
   };
 
-  // Dibuja la cantidad de campos segun la seleccion que se haga
   const renderIndemnizacionSection = (tipo) => {
     const cantidad = formData.cantidadFamiliar;
     const mostrar =
@@ -191,29 +255,106 @@ export const ClientForm = ({ onSubmit, onClear }) => {
     return (
       <div key={tipo.key} className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200 mt-4">
         <h3 className="text-sm font-medium text-gray-700 mb-2">
-          {tipo.label}: Ingrese los valores
+          {tipo.label}: {tipo.type === "boolean" ? "Selecciona por familiar" : "Ingrese los valores"}
         </h3>
-        {Array.from({ length: num }).map((_, i) => (
-          <div key={i}>
-            <label
-              htmlFor={`indeniza_${tipo.key}_${i}`}
-              className="block text-sm text-gray-600 mb-1"
-            >
-              {tipo.label} - Familiar {i + 1}
-            </label>
-            <input
-              type="number"
-              id={`indeniza_${tipo.key}_${i}`}
-              name={`indeniza_${tipo.key}_${i}`}
-              value={indenizas[tipo.key][i] || ""}
-              onChange={handleChange}
-              min="0"
-              step="0.01"              
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              placeholder={`Ej. ${(i + 1) * 1000}`}
-            />
+        {Array.from({ length: num }).map((_, i) => {
+          if (tipo.type === "boolean") {
+            return (
+              <div key={i}>
+                <label
+                  htmlFor={`indeniza_${tipo.key}_${i}`}
+                  className="block text-sm text-gray-600 mb-1"
+                >
+                  {tipo.label} - Familiar {i + 1}
+                </label>
+                <select
+                  id={`indeniza_${tipo.key}_${i}`}
+                  name={`indeniza_${tipo.key}_${i}`}
+                  value={indenizas[tipo.key][i] || "no"}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                >
+                  <option value="si">Sí</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+            );
+          } else {
+            return (
+              <div key={i}>
+                <label
+                  htmlFor={`indeniza_${tipo.key}_${i}`}
+                  className="block text-sm text-gray-600 mb-1"
+                >
+                  {tipo.label} - Familiar {i + 1}
+                </label>
+                <input
+                  type="number"
+                  id={`indeniza_${tipo.key}_${i}`}
+                  name={`indeniza_${tipo.key}_${i}`}
+                  value={indenizas[tipo.key][i] || ""}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  placeholder={`Ej. ${(i + 1) * 1000}`}
+                />
+              </div>
+            );
+          }
+        })}
+      </div>
+    );
+  };
+
+  const renderMascotasSection = () => {
+    if (!formData.tieneMascota) return null;
+
+    return (
+      <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200 mt-4">
+        <h3 className="text-sm font-medium text-blue-800 mb-2">
+          Cobertura para Mascotas
+        </h3>
+
+        <div>
+          <label htmlFor="cantidadMascotas" className="block text-sm text-gray-700 mb-1">
+            Cantidad de mascotas a asegurar (máx. 10)
+          </label>
+          <input
+            type="number"
+            id="cantidadMascotas"
+            name="cantidadMascotas"
+            value={mascotasInfo.cantidad}
+            onChange={handleChange}
+            min="1"
+            max="10"
+            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="Ej. 2"
+          />
+        </div>
+
+        {mascotasInfo.cantidad !== "" && parseInt(mascotasInfo.cantidad, 10) > 0 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-gray-700">Especie de cada mascota:</h4>
+            {Array.from({ length: parseInt(mascotasInfo.cantidad, 10) }, (_, i) => (
+              <div key={i}>
+                <label htmlFor={`tipoMascota_${i}`} className="block text-sm text-gray-600 mb-1">
+                  Mascota {i + 1}
+                </label>
+                <select
+                  id={`tipoMascota_${i}`}
+                  name={`tipoMascota_${i}`}
+                  value={mascotasInfo.tipos[i] || "perro"}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                >
+                  <option value="perro">Perro</option>
+                  <option value="gato">Gato</option>
+                </select>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     );
   };
@@ -280,12 +421,25 @@ export const ClientForm = ({ onSubmit, onClear }) => {
               {tipo.label}
             </label>
           </div>
-        ))}        
+        ))}
 
-        {/* dibujar los campos segun la seleccion */}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="tieneMascota"
+            name="tieneMascota"
+            checked={formData.tieneMascota}
+            onChange={handleChange}
+            className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+          />
+          <label htmlFor="tieneMascota" className="ml-2 block text-sm text-gray-700">
+            Cobertura para Mascotas
+          </label>
+        </div>
+
         {indemnizacionTipos.map(renderIndemnizacionSection)}
+        {renderMascotasSection()}
 
-        {/* Solicita el valor del Seguro */}
         <div>
           <label htmlFor="costoTotal" className="block text-sm font-medium text-gray-700 mb-1">
             Costo del Seguro
@@ -297,12 +451,43 @@ export const ClientForm = ({ onSubmit, onClear }) => {
             value={formData.costoTotal}
             onChange={handleChange}
             min="0"
+            step="0.01"
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-            placeholder="Ej. 10"
+            placeholder="Ej. 150.50"
           />
         </div>
 
-        {/* Dibujas los botones */}
+        {/* Campo de observaciones */}
+        <div>
+          <label htmlFor="observaciones" className="block text-sm font-medium text-gray-700 mb-1">
+            Observaciones (opcional)
+          </label>
+          <textarea
+            id="observaciones"
+            name="observaciones"
+            value={formData.observaciones}
+            onChange={handleChange}
+            rows="3"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            placeholder="Ej. Cliente prefiere cobertura amplia..."
+          />
+        </div>
+
+        {/* Campo de fecha */}
+        <div>
+          <label htmlFor="fechaCotizacion" className="block text-sm font-medium text-gray-700 mb-1">
+            Fecha de Cotización
+          </label>
+          <input
+            type="date"
+            id="fechaCotizacion"
+            name="fechaCotizacion"
+            value={formData.fechaCotizacion}
+            onChange={handleChange}
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+          />
+        </div>
+
         <div className="flex space-x-3">
           <button
             type="submit"

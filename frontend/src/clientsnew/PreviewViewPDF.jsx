@@ -1,7 +1,7 @@
 // src/components/PreviewView.jsx
 import React from "react";
 
-export const PreviewView = ({ data }) => {
+export const PreviewViewPDF = ({ data }) => {
   const {
     nombre,
     txtfamiliar1,
