@@ -1,4 +1,4 @@
-// src/components/PreviewView.jsx
+// src/components/PreviewViewPDF.jsx
 import React from "react";
 
 export const PreviewViewPDF = ({ data }) => {
@@ -14,121 +14,213 @@ export const PreviewViewPDF = ({ data }) => {
     indenizas,
     cantidadFamiliar,
     costoTotal,
+    mascotas, // ← Asegúrate de que este campo venga en data
   } = data;
 
-  console.log("Datos recibidos en PreviewView ", data)
+  // Función auxiliar: ¿tiene al menos un valor > 0?
+  const hasNonZeroValues = (arr) => Array.isArray(arr) && arr.some(v => v > 0);
 
   return (
-    <div id="pdf-content" className="p-6 max-w-3xl mx-auto bg-white text-sm leading-relaxed">
-      <h2 className="text-xl font-bold mb-4 ">¿QUÉ INCLUYE?</h2>
-      <p className="mb-4">
+    <div
+      id="pdf-content"
+      className="p-6 max-w-3xl mx-auto bg-white"
+      style={{
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        fontSize: '16px',
+        lineHeight: '1.6',
+        color: '#1f2937',
+      }}
+    >
+      {/* Encabezado llamativo */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-blue-800 mb-2">
+          RESUMEN DE COBERTURAS
+        </h1>
+        <div className="w-24 h-1 bg-red-500 mx-auto rounded-full"></div>
+      </div>
+
+      {/* Nombre y grupo familiar */}
+      <p className="text-lg font-semibold mb-4 text-gray-800">
         <strong>{nombre}</strong> {txtfamiliar1}{cantidadFamiliar}{txtfamiliar2}
       </p>
-      <p className="mb-4">
-        Es como un multi seguro, ya que tiene muchas coberturas incluidas, (es como si tuvieras varias pólizas pagando tan solo una).
+
+      <p className="mb-5 text-gray-700">
+        Es como un <strong>multiseguro</strong>: múltiples coberturas incluidas pagando una sola prima.
       </p>
-      <p className="font-bold mb-2 border-t border-gray-300">INCLUYE TODO LO DEL SIGUIENTE LISTADO: TODO</p>
-      <ul className="list-disc pl-5 space-y-1 mb-4">
+
+      <div className="mb-5 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
+        <p className="font-bold text-blue-800">✅ INCLUYE TODO LO SIGUIENTE:</p>
+      </div>
+
+      <ul className="space-y-4 mb-6">
+        {/* Servicios fijos */}
         <li>
-          <strong style={{ color: 'red' }}>1. Asesoría jurídica telefónica:</strong> poder llamar a un abogado ,y te asesores desde cualquier área legal, gratis.
-          <br />    
-          <a href="https://www.occident.com/servicios/asesoramiento-juridico-gratuito-telefono" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver más</a>
-        </li>
-        <li>
-          <strong style={{ color: 'red' }}>2. Servicio de decesos o funerario:</strong> Servicio fúnebre y traslado nacional e internacional si fuera necesario.
-          <br />
-          <a href="https://www.occident.com/sgi/seguros-decesos/familiar" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver más</a>
-        </li>
-        <li>
-          <strong style={{ color: 'red' }}>3. Gestoría de fallecimiento.</strong>
-          <br />
-          <a href="https://www.occident.com/servicios/gestoria-defuncion" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver más</a>
+          <strong className="text-red-600">1. Asesoría jurídica telefónica</strong>: Acceso gratuito a abogado en cualquier área legal.<br />
+          <a
+            href="https://www.occident.com/servicios/asesoramiento-juridico-gratuito-telefono"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800"
+          >
+            Ver más
+          </a>
         </li>
 
         <li>
-          <strong style={{ color: 'red' }}>4. Testamento online:</strong> Incluye asesoría, gastos de abogado, coordinación y notario para: 1 Testamento hereditario, 2 Testamento vital o últimas voluntades, 3 Borrado digital.
-          <br />
-          <a href="https://www.occident.com/servicios/testamento-online" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver más</a>
+          <strong className="text-red-600">2. Servicio funerario (decesos)</strong>: Incluye sepelio, traslado nacional e internacional.<br />
+          <a
+            href="https://www.occident.com/sgi/seguros-decesos/familiar"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800"
+          >
+            Ver más
+          </a>
         </li>
+
         <li>
-          <strong style={{ color: 'red' }}>TAMBIÉN INCLUYE : CUADRO MÉDICO OCCIDENT BIENESTAR Y SALUD</strong> los cuales tienen los siguientes servicios:
-          <br />
-          <a href="https://bienestarysalud.occident.com/busqueda?opc=2 " target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver más</a>
+          <strong className="text-red-600">3. Gestoría de fallecimiento</strong>: Trámites tras una defunción (pensiones, certificados, etc.).<br />
+          <a
+            href="https://www.occident.com/servicios/gestoria-defuncion"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800"
+          >
+            Ver más
+          </a>
         </li>
 
         <li>
-          <strong style={{ color: 'red' }}>5.Descuentos en el dentista: (Incluye valoración y limpieza dental gratuita a cada uno)</strong>, además de descuentos en tratamientos dentales y ortodoncia (20%-60%).
-          <br />
-          <a href="https://bienestarysalud.occident.com/busqueda?opc=2" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver más</a>
-        </li>
-        <li>
-          <strong style={{ color: 'red' }}>6.Acceso a la medicina privada:</strong> Cita y controles con todo tipo de especialistas (pediatra, psicólogo, etc.) con precios baremados. Pagas entre 20% y 60% menos.
-        </li>
-        <li>
-          <strong style={{ color: 'red' }}>7. 16 horas al año de asistenta del hogar:</strong> En caso de reposo domiciliario por indicación médica.
-        </li>
-        <li>
-          <strong style={{ color: 'red' }}>8. 8 horas de ayuda a domicilio al año:</strong> Por convalecencia postquirúrgica y/o post hospitalaria.
-          <br />
-          <a href="https://bienestarysalud.occident.com/gratuitos-convalecencia-post-hospitalaria" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver más</a>
-        </li>
-        <li>
-          <strong style={{ color: 'red' }}>9. Segunda opinión médica:</strong> En caso de enfermedad grave.
-          <br />
-          <a href="https://bienestarysalud.occident.com/gratuitos-segunda-opinion-medica" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver más</a>
+          <strong className="text-red-600">4. Testamento online + Borrado digital</strong>: Incluye redacción, notario, registro y limpieza digital.<br />
+          <a
+            href="https://www.occident.com/servicios/testamento-online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800"
+          >
+            Ver más
+          </a>
         </li>
 
-        {tieneIndemnizacion && (
+        <li>
+          <strong className="text-red-600">5. Bienestar y Salud Occident</strong>: Cuadro médico privado, descuentos dentales, psicología, etc.<br />
+          <a
+            href="https://bienestarysalud.occident.com/busqueda?opc=2"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800"
+          >
+            Ver más
+          </a>
+        </li>
+
+        <li>
+          <strong className="text-red-600">6. Medicina privada con descuentos</strong>: Hasta 60% menos en consultas con especialistas.
+        </li>
+
+        <li>
+          <strong className="text-red-600">7. 16 horas/año de asistenta del hogar</strong>: En caso de reposo médico domiciliario.
+        </li>
+
+        <li>
+          <strong className="text-red-600">8. 8 horas/año de ayuda a domicilio</strong>: Tras hospitalización.<br />
+          <a
+            href="https://bienestarysalud.occident.com/gratuitos-convalecencia-post-hospitalaria"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800"
+          >
+            Ver más
+          </a>
+        </li>
+
+        <li>
+          <strong className="text-red-600">9. Segunda opinión médica</strong>: En casos de enfermedad grave.<br />
+          <a
+            href="https://bienestarysalud.occident.com/gratuitos-segunda-opinion-medica"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800"
+          >
+            Ver más
+          </a>
+        </li>
+
+        {/* Indemnizaciones condicionales (solo si hay valores > 0) */}
+        {tieneIndemnizacion && hasNonZeroValues(indenizas.tieneIndemnizacion) && (
           <li>
-            <strong style={{ color: 'red' }}>10. Indemnización por hospitalización:</strong> Por cada día que pases en el hospital ingresado.
-            {indenizas.tieneIndemnizacion.length > 0 && (
-              <ul className="list-none pl-0 mt-1">
-                {indenizas.tieneIndemnizacion.map((v, i) => (
-                  <li key={i}>• Familiar {i + 1}: {v}€</li>
+            <strong className="text-red-600">10. Indemnización por hospitalización</strong>: Por día de ingreso hospitalario.
+            <ul className="mt-1 pl-5 list-none">
+              {indenizas.tieneIndemnizacion
+                .filter(v => v > 0)
+                .map((v, i) => (
+                  <li key={i} className="text-gray-700">• Familiar {i + 1}: <strong>{v} €</strong></li>
                 ))}
-              </ul>
-            )}
+            </ul>
           </li>
         )}
 
-        {tieneIndeAccidente && (
+        {tieneIndeAccidente && hasNonZeroValues(indenizas.tieneIndeAccidente) && (
           <li>
-            <strong style={{ color: 'red' }}>11. Indemnización por muerte por accidente:</strong> 
-            {indenizas.tieneIndeAccidente.length > 0 && (
-              <ul className="list-none pl-0 mt-1">
-                {indenizas.tieneIndeAccidente.map((v, i) => (
-                  <li key={i}>• Familiar {i + 1}: {v}€</li>
+            <strong className="text-red-600">11. Indemnización por muerte por accidente</strong>
+            <ul className="mt-1 pl-5 list-none">
+              {indenizas.tieneIndeAccidente
+                .filter(v => v > 0)
+                .map((v, i) => (
+                  <li key={i} className="text-gray-700">• Familiar {i + 1}: <strong>{v} €</strong></li>
                 ))}
-              </ul>
-            )}
+            </ul>
           </li>
         )}
 
-        {tieneIndeInvalidez && (
+        {tieneIndeInvalidez && hasNonZeroValues(indenizas.tieneIndeInvalidez) && (
           <li>
-            <strong style={{ color: 'red' }}>12. Indemnización por invalidez permanente:</strong> Por cada participante.
-            {indenizas.tieneIndeInvalidez.length > 0 && (
-              <ul className="list-none pl-0 mt-1">
-                {indenizas.tieneIndeInvalidez.map((v, i) => (
-                  <li key={i}>• Familiar {i + 1}: {v}€</li>
+            <strong className="text-red-600">12. Indemnización por invalidez permanente</strong>
+            <ul className="mt-1 pl-5 list-none">
+              {indenizas.tieneIndeInvalidez
+                .filter(v => v > 0)
+                .map((v, i) => (
+                  <li key={i} className="text-gray-700">• Familiar {i + 1}: <strong>{v} €</strong></li>
                 ))}
-              </ul>
-            )}
+            </ul>
           </li>
         )}
 
-        {tieneHospitalizacion && <li><strong>Hospitalización Elite</strong></li>}
-        {tieneMascota && <li><strong>Cobertura para mascotas</strong></li>}
+        {tieneHospitalizacion && (
+          <li>
+            <strong className="text-red-600">13. Hospitalización Elite</strong>
+          </li>
+        )}
+
+        {tieneMascota && mascotas && (
+          <li>
+            <strong className="text-red-600">14. Cobertura para mascotas</strong>:
+            <ul className="mt-1 pl-5 list-none">
+              <li className="text-gray-700">
+                Cantidad: <strong>{mascotas.cantidad}</strong>
+              </li>
+              {mascotas.tipos.map((tipo, i) => (
+                <li key={i} className="text-gray-700">
+                  • Mascota {i + 1}: <strong>{tipo === "perro" ? "Perro" : "Gato"}</strong>
+                </li>
+              ))}
+            </ul>
+          </li>
+        )}
       </ul>
 
-      <p className="mt-4 italic">
-        NOTA: Ejemplo para {cantidadFamiliar || 'X'} personas por {costoTotal} €/mes. Incluye absolutamente todo lo que está escrito en este documento.
-      </p>
+      {/* Nota final */}
+      {costoTotal > 0 && (
+        <p className="mt-6 italic text-gray-700 bg-yellow-50 p-3 rounded">
+          <strong>NOTA:</strong> Ejemplo para {cantidadFamiliar || 'X'} persona(s) por <strong>{costoTotal} €/mes</strong>. Incluye absolutamente todas las coberturas listadas.
+        </p>
+      )}
 
-      <div className="mt-6 pt-4 border-t border-gray-300 text-sm">
-        <p><strong>Eliana Rincón O.</strong></p>
-        <p>Móvil: 603 180 226</p>
-        <p>Agente de Seguros Exclusivo</p>
+      {/* Firma */}
+      <div className="mt-8 pt-4 border-t border-gray-300 text-center">
+        <p className="font-semibold text-gray-800">Eliana Rincón O.</p>
+        <p className="text-gray-600">Móvil: 603 180 226</p>
+        <p className="text-gray-600">Agente de Seguros Exclusivo</p>
       </div>
     </div>
   );

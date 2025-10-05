@@ -16,7 +16,6 @@ export const ClientManager = () => {
     setPreviewData(null);
   };
 
-  //En esta parte generamos el PDF a mostrar
   const generatePDF = () => {
     const input = document.getElementById("pdf-content");
     if (!input) {
@@ -24,13 +23,21 @@ export const ClientManager = () => {
       return;
     }
 
-    html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
+    // Aumentar escala para mejor calidad en móvil
+    html2canvas(input, {
+      scale: 3, // Alta resolución
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+    }).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const width = pdf.internal.pageSize.getWidth();
-      const height = (canvas.height * width) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, width, Math.min(height, 297));
-      pdf.save(`Seguro_Occident_${previewData.nombre.replace(/\s+/g, "_")}.pdf`); // Colocamos el nombre para cuando se descarga el archivo
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      // Si el contenido es más largo que una página, podrías dividirlo (aquí asumimos 1 página)
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, Math.min(pdfHeight, 297));
+      pdf.save(`Seguro_Occident_${previewData.nombre.replace(/\s+/g, "_")}.pdf`);
     });
   };
 
@@ -38,18 +45,18 @@ export const ClientManager = () => {
     return (
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         <PreviewViewPDF data={previewData} />
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
           <button
             onClick={() => setPreviewData(null)}
-            className="px-5 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-medium"
           >
             ← Editar datos
           </button>
           <button
             onClick={generatePDF}
-            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg hover:from-blue-700 hover:to-blue-900 transition font-medium shadow-md"
           >
-            Descargar PDF
+            📄 Descargar PDF
           </button>
         </div>
       </div>
