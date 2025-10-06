@@ -1,4 +1,3 @@
-// src/components/PreviewViewPDF.jsx
 import React from "react";
 
 export const PreviewViewPDF = ({ data }) => {
@@ -17,10 +16,7 @@ export const PreviewViewPDF = ({ data }) => {
     mascotas,
   } = data;
 
-  // ¿Tiene al menos un valor numérico > 0?
   const hasNonZeroValues = (arr) => Array.isArray(arr) && arr.some(v => v > 0);
-
-  // ¿Tiene al menos un "si" en un array de respuestas booleanas ("si"/"no")?
   const hasAnyYes = (arr) => Array.isArray(arr) && arr.some(v => v === "si");
 
   return (
@@ -32,10 +28,11 @@ export const PreviewViewPDF = ({ data }) => {
         fontSize: '16px',
         lineHeight: '1.6',
         color: '#1f2937',
+        pageBreakAfter: 'avoid',
       }}
     >
-      {/* Encabezado llamativo */}
-      <div className="text-center mb-6">
+      {/* Encabezado */}
+      <div className="text-center mb-6 avoid-page-break">
         <h1 className="text-2xl md:text-3xl font-extrabold text-blue-800 mb-2">
           RESUMEN DE COBERTURAS
         </h1>
@@ -43,21 +40,21 @@ export const PreviewViewPDF = ({ data }) => {
       </div>
 
       {/* Nombre y grupo familiar */}
-      <p className="text-lg font-semibold mb-4 text-gray-800">
+      <p className="text-lg font-semibold mb-4 text-gray-800 avoid-page-break">
         <strong>{nombre}</strong> {txtfamiliar1}{cantidadFamiliar}{txtfamiliar2}
       </p>
 
-      <p className="mb-5 text-gray-700">
+      <p className="mb-5 text-gray-700 avoid-page-break">
         Es como un <strong>multiseguro</strong>: múltiples coberturas incluidas pagando una sola prima.
       </p>
 
-      <div className="mb-5 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
+      <div className="mb-5 p-3 bg-blue-50 border-l-4 border-blue-500 rounded avoid-page-break">
         <p className="font-bold text-blue-800">✅ INCLUYE TODO LO SIGUIENTE:</p>
       </div>
 
       <ul className="space-y-4 mb-6">
         {/* Servicios fijos */}
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">1. Asesoría jurídica telefónica</strong>: Acceso gratuito a abogado en cualquier área legal.<br />
           <a
             href="https://www.occident.com/servicios/asesoramiento-juridico-gratuito-telefono"
@@ -69,7 +66,7 @@ export const PreviewViewPDF = ({ data }) => {
           </a>
         </li>
 
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">2. Servicio funerario (decesos)</strong>: Incluye sepelio, traslado nacional e internacional.<br />
           <a
             href="https://www.occident.com/sgi/seguros-decesos/familiar"
@@ -81,7 +78,7 @@ export const PreviewViewPDF = ({ data }) => {
           </a>
         </li>
 
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">3. Gestoría de fallecimiento</strong>: Trámites tras una defunción (pensiones, certificados, etc.).<br />
           <a
             href="https://www.occident.com/servicios/gestoria-defuncion"
@@ -93,7 +90,7 @@ export const PreviewViewPDF = ({ data }) => {
           </a>
         </li>
 
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">4. Testamento online + Borrado digital</strong>: Incluye redacción, notario, registro y limpieza digital.<br />
           <a
             href="https://www.occident.com/servicios/testamento-online"
@@ -105,7 +102,7 @@ export const PreviewViewPDF = ({ data }) => {
           </a>
         </li>
 
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">5. Bienestar y Salud Occident</strong>: Cuadro médico privado, descuentos dentales, psicología, etc.<br />
           <a
             href="https://bienestarysalud.occident.com/busqueda?opc=2"
@@ -117,15 +114,15 @@ export const PreviewViewPDF = ({ data }) => {
           </a>
         </li>
 
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">6. Medicina privada con descuentos</strong>: Hasta 60% menos en consultas con especialistas.
         </li>
 
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">7. 16 horas/año de asistenta del hogar</strong>: En caso de reposo médico domiciliario.
         </li>
 
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">8. 8 horas/año de ayuda a domicilio</strong>: Tras hospitalización.<br />
           <a
             href="https://bienestarysalud.occident.com/gratuitos-convalecencia-post-hospitalaria"
@@ -137,7 +134,7 @@ export const PreviewViewPDF = ({ data }) => {
           </a>
         </li>
 
-        <li>
+        <li className="avoid-page-break">
           <strong className="text-red-600">9. Segunda opinión médica</strong>: En casos de enfermedad grave.<br />
           <a
             href="https://bienestarysalud.occident.com/gratuitos-segunda-opinion-medica"
@@ -151,7 +148,7 @@ export const PreviewViewPDF = ({ data }) => {
 
         {/* Indemnizaciones condicionales */}
         {tieneIndemnizacion && hasNonZeroValues(indenizas.tieneIndemnizacion) && (
-          <li>
+          <li className="avoid-page-break">
             <strong className="text-red-600">10. Indemnización por hospitalización</strong>: Por día de ingreso hospitalario.
             <ul className="mt-1 pl-5 list-none">
               {indenizas.tieneIndemnizacion
@@ -164,7 +161,7 @@ export const PreviewViewPDF = ({ data }) => {
         )}
 
         {tieneIndeAccidente && hasNonZeroValues(indenizas.tieneIndeAccidente) && (
-          <li>
+          <li className="avoid-page-break">
             <strong className="text-red-600">11. Indemnización por muerte por accidente</strong>
             <ul className="mt-1 pl-5 list-none">
               {indenizas.tieneIndeAccidente
@@ -177,7 +174,7 @@ export const PreviewViewPDF = ({ data }) => {
         )}
 
         {tieneIndeInvalidez && hasNonZeroValues(indenizas.tieneIndeInvalidez) && (
-          <li>
+          <li className="avoid-page-break">
             <strong className="text-red-600">12. Indemnización por invalidez permanente</strong>
             <ul className="mt-1 pl-5 list-none">
               {indenizas.tieneIndeInvalidez
@@ -189,9 +186,8 @@ export const PreviewViewPDF = ({ data }) => {
           </li>
         )}
 
-        {/* Hospitalización Elite: mostrar solo si hay al menos un "si" */}
         {tieneHospitalizacion && hasAnyYes(indenizas.tieneHospitalizacion) && (
-          <li>
+          <li className="avoid-page-break">
             <strong className="text-red-600">13. Hospitalización Elite</strong>: Cobertura activa para los siguientes familiares:
             <ul className="mt-1 pl-5 list-none">
               {indenizas.tieneHospitalizacion
@@ -204,9 +200,8 @@ export const PreviewViewPDF = ({ data }) => {
           </li>
         )}
 
-        {/* Mascotas */}
         {tieneMascota && mascotas && (
-          <li>
+          <li className="avoid-page-break">
             <strong className="text-red-600">14. Cobertura para mascotas</strong>:
             <ul className="mt-1 pl-5 list-none">
               <li className="text-gray-700">
@@ -224,13 +219,13 @@ export const PreviewViewPDF = ({ data }) => {
 
       {/* Nota final */}
       {costoTotal > 0 && (
-        <p className="mt-6 italic text-gray-700 bg-yellow-50 p-3 rounded">
+        <p className="mt-6 italic text-gray-700 bg-yellow-50 p-3 rounded avoid-page-break">
           <strong>NOTA:</strong> Ejemplo para {cantidadFamiliar || 'X'} persona(s) por <strong>{costoTotal} €/mes</strong>. Incluye absolutamente todas las coberturas listadas.
         </p>
       )}
 
       {/* Firma */}
-      <div className="mt-8 pt-4 border-t border-gray-300 text-center">
+      <div className="mt-8 pt-4 border-t border-gray-300 text-center avoid-page-break">
         <p className="font-semibold text-gray-800">Eliana Rincón O.</p>
         <p className="text-gray-600">Móvil: 603 180 226</p>
         <p className="text-gray-600">Agente de Seguros Exclusivo</p>
