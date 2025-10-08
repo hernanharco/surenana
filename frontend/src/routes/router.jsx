@@ -5,7 +5,6 @@ import { createBrowserRouter } from 'react-router-dom';
 
 
 // Paginas
-import { ClientList } from '../components/ClientList';
 import { ClientManager } from '../clientsnew/ClientManager'
 
 export const router = createBrowserRouter([

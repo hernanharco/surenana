@@ -3,8 +3,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* En tu archivo CSS global o en un <style> */
+/* Esas líneas de código CSS sirven para evitar que un elemento se divida entre dos páginas al momento de imprimir o generar un PDF. */
 .avoid-page-break {
-  page-break-inside: avoid;
-  break-inside: avoid;
+  page-break-inside: avoid;   /* Para navegadores más antiguos (como IE, Safari viejo) */
+  break-inside: avoid;        /* Estándar moderno (Chrome, Firefox, Edge, etc.) */
 }

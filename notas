@@ -1,0 +1,11 @@
+Guías prácticas (orientativas, no dogmáticas):
+Componente funcional (React)
+100–250 líneas
+Clase de servicio / lógica
+100–300 líneas
+Clase de utilidad
+< 100 líneas
+Archivo de configuración
+< 100 líneas
+
+pnpm test

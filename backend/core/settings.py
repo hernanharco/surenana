@@ -82,8 +82,7 @@ from urllib.parse import urlparse
 DATABASE_URL = os.getenv('DATABASE_URL_POSTGRES')
 if DATABASE_URL:
     url = urlparse(DATABASE_URL)
-    # Extraer solo el nombre de la base de datos (antes de los dos puntos)
-    db_name = url.path[1:].split(':')[0]  # ← Esto es clave
+    db_name = url.path[1:]  # ✅ Correcto: toma toda la ruta como nombre de DB
 
     DATABASES = {
         'default': {
@@ -161,4 +160,9 @@ CORS_ALLOW_ALL_ORIGINS = False  # 🔒 Mejor desactivarlo y usar solo ALLOWED_OR
 REST_FRAMEWORK = {
     # Tu configuración actual...
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Seguros Nana API',
+    'VERSION': '1.0.0',
 }
